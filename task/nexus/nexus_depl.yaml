@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus-deployment
+  namespace: nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      securityContext:
+        runAsUser: 0
+      fsGroup: 0
+      nodeSelector:
+        key: worker3
+      containers:
+        - name: nexus
+          image: sonatype/nexus3:3.52.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+              name: nexus-web
+            - containerPort: 5000
+              name: nexus-docker
+          resources:
+            requests:
+              cpu: "1"
+              memory: "3Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+      volumes:
+        - name: nexus-data
+          hostPath:
+            path: /nexus/data
